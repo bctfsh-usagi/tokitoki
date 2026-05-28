@@ -2,7 +2,12 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- iOS '홈 화면에 추가' 시 전체화면 웹앱으로 실행 (주소창·사파리 메뉴 숨김) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="당근콩콩">
 <title>토끼의 당근콩콩 🐰🥕</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +60,8 @@
   /* ---------- GAME ---------- */
   #game{justify-content:flex-start;padding:0;}
   #hud{position:absolute;top:0;left:0;right:0;z-index:30;display:flex;
-    justify-content:space-between;align-items:flex-start;padding:14px 18px;pointer-events:none;}
+    justify-content:space-between;align-items:flex-start;
+    padding:calc(14px + env(safe-area-inset-top)) 18px 0;pointer-events:none;}
   .score-box{font-family:'Jua';color:var(--pink-deep);text-shadow:0 2px 0 #fff;}
   .score-box .label{font-family:'Gaegu';font-weight:700;font-size:13px;color:var(--plum);display:block;opacity:.8;}
   .score-box .val{font-size:30px;line-height:1;}
