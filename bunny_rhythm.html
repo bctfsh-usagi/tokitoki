@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>토끼의 당근콩콩 🐰🥕</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink-1:#ffeaf3;
+    --pink-2:#ffd6e8;
+    --pink-3:#ffbcd8;
+    --pink-4:#ff9ec7;
+    --pink-deep:#ff6fa5;
+    --plum:#a85278;
+    --cream:#fff7fb;
+    --mint:#cdeede;
+    --sky:#dcefff;
+    --carrot:#ff924c;
+    --carrot-leaf:#7fce6b;
+    --lane-line: rgba(255,255,255,.55);
+    --shadow: 0 10px 30px rgba(255,111,165,.35);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Jua', sans-serif;
+    background:
+      radial-gradient(120% 80% at 50% -10%, var(--pink-1) 0%, var(--pink-2) 45%, var(--pink-3) 100%);
+    color:var(--plum);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    touch-action:none;
+  }
+  /* phone frame */
+  #app{
+    position:relative;
+    width:min(100vw, 430px);
+    height:100dvh;
+    max-height:932px;
+    overflow:hidden;
+    background:
+      radial-gradient(140% 60% at 50% 110%, var(--mint) 0%, transparent 45%),
+      radial-gradient(120% 70% at 50% -15%, #fff 0%, var(--pink-1) 40%, var(--pink-2) 100%);
+    box-shadow:var(--shadow);
+  }
+  /* floating clouds & sparkles */
+  .cloud{position:absolute; background:#fff; border-radius:50%; opacity:.85;
+    filter:drop-shadow(0 6px 0 rgba(255,255,255,.6));}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%;}
+  .deco{position:absolute; pointer-events:none; user-select:none;}
+  @keyframes drift{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+  @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1.1)}}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+  .screen{position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:24px; text-align:center;
+    transition:opacity .4s ease, transform .4s ease;}
+  .hidden{opacity:0; pointer-events:none; transform:scale(.96);}
+
+  /* ---------- TITLE SCREEN ---------- */
+  #title h1{font-family:'Jua'; font-size:clamp(34px,9vw,46px); color:var(--pink-deep);
+    margin:0; line-height:1.15; text-shadow:0 3px 0 #fff, 0 6px 14px rgba(255,111,165,.4);}
+  #title .sub{font-family:'Gaegu'; font-weight:700; font-size:20px; color:var(--plum); margin:6px 0 0;}
+  .bunny-hero{font-size:120px; animation:floaty 2.6s ease-in-out infinite; margin:10px 0; filter:drop-shadow(0 14px 10px rgba(255,111,165,.35));}
+  .song-list{display:flex; flex-direction:column; gap:14px; width:100%; max-width:320px; margin-top:8px;}
+  .song-btn{
+    font-family:'Gaegu'; font-weight:700; font-size:21px;
+    border:none; cursor:pointer; padding:16px 18px; border-radius:24px;
+    background:linear-gradient(180deg,#fff, var(--pink-1));
+    color:var(--plum); box-shadow:0 6px 0 var(--pink-3), 0 10px 18px rgba(255,111,165,.25);
+    display:flex; align-items:center; gap:12px; transition:transform .08s, box-shadow .08s;
+  }
+  .song-btn:active{transform:translateY(4px); box-shadow:0 2px 0 var(--pink-3), 0 6px 12px rgba(255,111,165,.25);}
+  .song-btn .emoji{font-size:30px;}
+  .song-btn .meta{margin-left:auto; font-size:14px; color:var(--pink-deep); opacity:.9;}
+  .hint{font-family:'Gaegu'; font-weight:700; font-size:15px; color:var(--plum); opacity:.7; margin-top:18px;}
+
+  /* ---------- GAME SCREEN ---------- */
+  #game{justify-content:flex-start; padding:0;}
+  #hud{position:absolute; top:0; left:0; right:0; z-index:30; display:flex;
+    justify-content:space-between; align-items:flex-start; padding:14px 18px;
+    pointer-events:none;}
+  .score-box{font-family:'Jua'; color:var(--pink-deep); text-shadow:0 2px 0 #fff;}
+  .score-box .label{font-family:'Gaegu'; font-weight:700; font-size:13px; color:var(--plum); display:block; opacity:.75;}
+  .score-box .val{font-size:30px; line-height:1;}
+  #songName{font-family:'Gaegu'; font-weight:700; font-size:16px; text-align:right; color:var(--plum);}
+  #backBtn{pointer-events:auto; cursor:pointer; border:none; background:#fff8; color:var(--plum);
+    font-family:'Gaegu';font-weight:700; border-radius:14px; padding:6px 12px; font-size:14px; margin-top:6px;}
+
+  #combo{position:absolute; top:34%; left:0; right:0; z-index:25; text-align:center; pointer-events:none;}
+  #combo .num{font-family:'Jua'; font-size:64px; color:#fff; line-height:1;
+    text-shadow:0 0 18px var(--pink-deep), 0 4px 0 var(--pink-4);}
+  #combo .txt{font-family:'Gaegu'; font-weight:700; font-size:22px; color:var(--pink-deep); text-shadow:0 2px 0 #fff;}
+  .pop{animation:popc .35s ease;}
+  @keyframes popc{0%{transform:scale(.5);opacity:0}40%{transform:scale(1.25);opacity:1}100%{transform:scale(1);opacity:1}}
+
+  #judge{position:absolute; top:52%; left:0; right:0; text-align:center; z-index:26; pointer-events:none;
+    font-family:'Jua'; font-size:34px; opacity:0;}
+  @keyframes judgep{0%{opacity:0;transform:translateY(10px) scale(.8)}25%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-18px) scale(1)}}
+
+  #playfield{position:absolute; inset:0; z-index:10;}
+  .lane-bg{position:absolute; top:0; bottom:0; }
+  .lane-bg::after{content:""; position:absolute; inset:0; border-left:2px dashed var(--lane-line); border-right:2px dashed var(--lane-line); opacity:.5;}
+
+  #hitline{position:absolute; left:0; right:0; height:96px; z-index:12;
+    display:flex; align-items:center; justify-content:space-around;}
+  .target{width:64px; height:64px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--pink-2));
+    box-shadow:inset 0 -6px 0 rgba(255,111,165,.25), 0 6px 14px rgba(255,111,165,.3);
+    display:flex;align-items:center;justify-content:center; font-size:30px;
+    border:3px solid #fff; transition:transform .07s;}
+  .target.flash{animation:tflash .25s ease;}
+  @keyframes tflash{0%{transform:scale(1)}40%{transform:scale(1.35); box-shadow:0 0 26px var(--pink-deep)}100%{transform:scale(1)}}
+
+  .note{position:absolute; width:54px; height:54px; margin-left:-27px; z-index:11;
+    display:flex; align-items:center; justify-content:center; font-size:42px;
+    filter:drop-shadow(0 6px 4px rgba(255,111,165,.3)); will-change:transform;}
+  .note.gone{transition:transform .2s ease, opacity .2s ease; opacity:0; transform:scale(1.6);}
+
+  /* bunny at bottom catching */
+  #bunny{position:absolute; bottom:6px; z-index:20; font-size:64px; transition:left .12s cubic-bezier(.34,1.56,.64,1);
+    transform-origin:bottom center; pointer-events:none;}
+  #bunny.hop{animation:hop .3s ease;}
+  @keyframes hop{0%{transform:translateY(0) scaleY(1)}30%{transform:translateY(-26px) scaleY(1.08)}100%{transform:translateY(0) scaleY(1)}}
+  #bunny.sad{animation:shake .3s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-6deg)}75%{transform:translateX(6px) rotate(6deg)}}
+
+  .spark{position:absolute; z-index:22; font-size:22px; pointer-events:none; animation:spk .6s ease forwards;}
+  @keyframes spk{0%{opacity:1; transform:translate(0,0) scale(.6)}100%{opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.2)}}
+
+  #countdown{position:absolute; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
+    font-family:'Jua'; font-size:120px; color:#fff; text-shadow:0 0 24px var(--pink-deep), 0 6px 0 var(--pink-4);
+    pointer-events:none;}
+  .cd-anim{animation:cdp .9s ease;}
+  @keyframes cdp{0%{opacity:0;transform:scale(2)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.6)}}
+
+  /* ---------- RESULT SCREEN ---------- */
+  #result .rank{font-family:'Jua'; font-size:140px; line-height:1; color:var(--pink-deep);
+    text-shadow:0 4px 0 #fff, 0 10px 24px rgba(255,111,165,.4); animation:popc .5s ease;}
+  #result .bunny-end{font-size:96px; animation:floaty 2.4s ease-in-out infinite;}
+  .stat-card{background:#fff9; border-radius:22px; padding:16px 22px; margin-top:14px; width:100%; max-width:300px;
+    box-shadow:0 8px 18px rgba(255,111,165,.2);}
+  .stat-row{display:flex; justify-content:space-between; font-family:'Gaegu'; font-weight:700; font-size:19px; padding:5px 0;}
+  .stat-row .v{color:var(--pink-deep);}
+  .btn-row{display:flex; gap:12px; margin-top:20px;}
+  .pill{font-family:'Gaegu'; font-weight:700; font-size:18px; border:none; cursor:pointer;
+    padding:14px 22px; border-radius:22px; color:#fff; background:var(--pink-deep);
+    box-shadow:0 5px 0 #e1568c, 0 8px 16px rgba(255,111,165,.3); transition:transform .08s;}
+  .pill.ghost{background:#fff; color:var(--pink-deep); box-shadow:0 5px 0 var(--pink-3);}
+  .pill:active{transform:translateY(4px);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- floating decorations -->
+  <div class="deco" style="left:8%; top:10%; font-size:26px; animation:twinkle 3s infinite ease-in-out;">✨</div>
+  <div class="deco" style="right:10%; top:16%; font-size:20px; animation:twinkle 2.4s infinite ease-in-out .6s;">⭐</div>
+  <div class="deco" style="left:14%; top:24%; font-size:18px; animation:twinkle 2.8s infinite ease-in-out 1.1s;">💗</div>
+  <div class="deco cloud" style="left:-20px; top:6%; width:90px; height:38px; animation:drift 9s ease-in-out infinite alternate;"></div>
+  <div class="deco cloud" style="right:-10px; top:14%; width:70px; height:30px; animation:drift 11s ease-in-out infinite alternate-reverse;"></div>
+
+  <!-- ================= TITLE ================= -->
+  <section id="title" class="screen">
+    <h1>토끼의<br>당근콩콩</h1>
+    <p class="sub">콩콩 떨어지는 당근을 박자에 맞춰 톡!</p>
+    <div class="bunny-hero">🐰</div>
+    <div class="song-list" id="songList"></div>
+    <p class="hint">🎵 동요 멜로디 · 데스크탑은 D F J K 키 사용</p>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" class="screen hidden">
+    <div id="hud">
+      <div class="score-box"><span class="label">점수</span><span class="val" id="scoreVal">0</span></div>
+      <div style="text-align:right">
+        <div id="songName">🎵</div>
+        <button id="backBtn">← 그만</button>
+      </div>
+    </div>
+    <div id="combo"></div>
+    <div id="judge"></div>
+    <div id="playfield"></div>
+    <div id="hitline"></div>
+    <div id="bunny">🐰</div>
+    <div id="countdown"></div>
+  </section>
+
+  <!-- ================= RESULT ================= -->
+  <section id="result" class="screen hidden">
+    <div class="bunny-end" id="endBunny">🐰</div>
+    <div class="rank" id="rankLetter">A</div>
+    <div class="stat-card">
+      <div class="stat-row"><span>점수</span><span class="v" id="rScore">0</span></div>
+      <div class="stat-row"><span>최대 콤보</span><span class="v" id="rCombo">0</span></div>
+      <div class="stat-row"><span>퍼펙트 ✨</span><span class="v" id="rPerfect">0</span></div>
+      <div class="stat-row"><span>정확도</span><span class="v" id="rAcc">0%</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="pill ghost" id="toTitle">🏠 곡 선택</button>
+      <button class="pill" id="retry">🔁 다시</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   토끼의 당근콩콩 — 귀여운 동요 리듬게임
+   멜로디는 모두 퍼블릭 도메인 동요를 Web Audio로 직접 합성합니다.
+   ============================================================ */
+
+const LANES = 4;
+const NOTE_EMOJIS = ["🥕","🥕","🥕","🥕"];     // 떨어지는 당근
+const TARGET_EMOJIS = ["💗","⭐","🌸","🍀"];   // 받는 자리
+const KEYS = ["d","f","j","k"];
+
+// ----- 음 이름 -> 주파수 -----
+const FREQ = {C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.00,A4:440.00,B4:493.88,
+              C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
+function midi(n){const m={C:0,D:2,E:4,F:5,G:7,A:9,B:11};return m[n[0]]+12*(+n[1]+1);}
+
+// ----- 동요 (음, 박자) : 모두 퍼블릭 도메인 멜로디 -----
+const SONGS = {
+  twinkle:{
+    name:"반짝반짝 작은별", emoji:"⭐", beat:0.46,
+    notes:[["C4",1],["C4",1],["G4",1],["G4",1],["A4",1],["A4",1],["G4",2],
+           ["F4",1],["F4",1],["E4",1],["E4",1],["D4",1],["D4",1],["C4",2],
+           ["G4",1],["G4",1],["F4",1],["F4",1],["E4",1],["E4",1],["D4",2],
+           ["G4",1],["G4",1],["F4",1],["F4",1],["E4",1],["E4",1],["D4",2],
+           ["C4",1],["C4",1],["G4",1],["G4",1],["A4",1],["A4",1],["G4",2],
+           ["F4",1],["F4",1],["E4",1],["E4",1],["D4",1],["D4",1],["C4",2]]
+  },
+  airplane:{
+    name:"떴다 떴다 비행기", emoji:"✈️", beat:0.48,
+    notes:[["G4",1],["E4",1],["E4",2],["F4",1],["D4",1],["D4",2],
+           ["C4",1],["D4",1],["E4",1],["G4",1],["G4",1],["G4",1],["G4",2],
+           ["G4",1],["E4",1],["E4",1],["E4",1],["F4",1],["D4",1],["D4",2],
+           ["C4",1],["E4",1],["G4",1],["G4",1],["E4",1],["C4",2]]
+  },
+  butterfly:{
+    name:"나비야", emoji:"🦋", beat:0.46,
+    notes:[["G4",1],["E4",1],["E4",2],["F4",1],["D4",1],["D4",2],
+           ["C4",1],["D4",1],["E4",1],["F4",1],["G4",1],["G4",1],["G4",2],
+           ["G4",1],["E4",1],["E4",1],["E4",1],["F4",1],["D4",1],["D4",2],
+           ["C4",1],["E4",1],["G4",1],["G4",1],["E4",1],["C4",2]]
+  },
+  jacques:{
+    name:"자크 수사 (돌림노래)", emoji:"🔔", beat:0.44,
+    notes:[["C4",1],["D4",1],["E4",1],["C4",1],["C4",1],["D4",1],["E4",1],["C4",1],
+           ["E4",1],["F4",1],["G4",2],["E4",1],["F4",1],["G4",2],
+           ["G4",1],["A4",1],["G4",1],["F4",1],["E4",1],["C4",1],
+           ["G4",1],["A4",1],["G4",1],["F4",1],["E4",1],["C4",1],
+           ["C4",1],["G4",1],["C4",2],["C4",1],["G4",1],["C4",2]]
+  }
+};
+
+// ----- DOM -----
+const $=s=>document.querySelector(s);
+const playfield=$("#playfield"), hitline=$("#hitline"), bunny=$("#bunny"),
+      comboEl=$("#combo"), judgeEl=$("#judge"), scoreEl=$("#scoreVal"),
+      countdownEl=$("#countdown");
+const screens={title:$("#title"),game:$("#game"),result:$("#result")};
+function show(n){for(const k in screens)screens[k].classList.toggle("hidden",k!==n);}
+
+// ----- Audio -----
+let actx=null;
+function ensureAudio(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); }
+function tone(freq,t,dur){
+  // music-box 느낌: 삼각파 + 사인 살짝, 부드러운 엔벨로프
+  const o=actx.createOscillator(),o2=actx.createOscillator(),g=actx.createGain();
+  o.type="triangle"; o2.type="sine";
+  o.frequency.value=freq; o2.frequency.value=freq*2;
+  const g2=actx.createGain(); g2.gain.value=0.18;
+  o.connect(g); o2.connect(g2); g2.connect(g);
+  g.connect(actx.destination);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(0.28,t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0008,t+dur*0.95);
+  o.start(t); o2.start(t); o.stop(t+dur); o2.stop(t+dur);
+}
+function blip(ok){ // 히트 효과음
+  ensureAudio(); const t=actx.currentTime;
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type="sine"; o.connect(g); g.connect(actx.destination);
+  if(ok){o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1568,t+0.08);}
+  else {o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(160,t+0.12);}
+  g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+  o.start(t); o.stop(t+0.2);
+}
+
+// ----- 게임 상태 -----
+let state=null;
+const TRAVEL=1750;          // 당근이 떨어지는 시간(ms)
+const W={PERFECT:75,GREAT:125,GOOD:175}; // 타이밍 판정(ms)
+let laneX=[], topY=0, hitY=0;
+
+function layout(){
+  const rect=$("#app").getBoundingClientRect();
+  const W_=rect.width;
+  const margin=W_*0.06;
+  const usable=W_-margin*2;
+  for(let i=0;i<LANES;i++) laneX[i]=margin+usable*((i+0.5)/LANES);
+  hitY=rect.height-110;   // 히트라인 y
+  topY=-60;
+  // 히트라인/타겟 배치
+  hitline.style.top=(hitY-32)+"px";
+  hitline.innerHTML="";
+  for(let i=0;i<LANES;i++){
+    const t=document.createElement("div");
+    t.className="target"; t.textContent=TARGET_EMOJIS[i];
+    t.style.position="absolute"; t.style.left=(laneX[i]-32)+"px";
+    t.dataset.lane=i;
+    hitline.appendChild(t);
+  }
+  // 레인 점선 배경
+  playfield.querySelectorAll(".lane-bg").forEach(e=>e.remove());
+}
+window.addEventListener("resize",()=>{ if(state&&state.running) layout(); });
+
+// ----- 차트 생성 -----
+function buildChart(song){
+  const beatMs=song.beat*1000;
+  let cum=0;
+  const pitches=song.notes.map(n=>midi(n[0]));
+  const lo=Math.min(...pitches), hi=Math.max(...pitches);
+  const chart=[];
+  song.notes.forEach((n,idx)=>{
+    const dur=n[1]*beatMs;
+    const lane=hi===lo?0:Math.min(LANES-1,Math.floor((midi(n[0])-lo)/(hi-lo+0.0001)*LANES));
+    chart.push({offset:cum, lane, freq:FREQ[n[0]], durBeats:n[1], hit:false});
+    cum+=dur;
+  });
+  return {chart,total:cum};
+}
+
+// ----- 게임 시작 -----
+function startGame(key){
+  ensureAudio();
+  const song=SONGS[key];
+  show("game");
+  $("#songName").textContent=song.emoji+" "+song.name;
+  layout();
+  const {chart,total}=buildChart(song);
+  state={key,song,chart,total,running:false,
+         score:0,combo:0,maxCombo:0,perfect:0,great:0,good:0,miss:0,
+         notes:[],done:false};
+  scoreEl.textContent="0"; comboEl.innerHTML="";
+  // 카운트다운 후 시작
+  let c=3;
+  countdownEl.textContent="3"; countdownEl.className="cd-anim";
+  const cd=setInterval(()=>{
+    c--;
+    if(c>0){countdownEl.textContent=c; countdownEl.classList.remove("cd-anim");void countdownEl.offsetWidth;countdownEl.className="cd-anim";}
+    else if(c===0){countdownEl.textContent="시작!"; countdownEl.classList.remove("cd-anim");void countdownEl.offsetWidth;countdownEl.className="cd-anim";}
+    else {clearInterval(cd); countdownEl.textContent=""; countdownEl.className=""; beginPlay();}
+  },800);
+}
+
+function beginPlay(){
+  const s=state; s.running=true;
+  const audioStart=actx.currentTime+0.05;
+  s.perfStart=performance.now()+50;
+  // 멜로디 예약 + 노트 객체 생성
+  s.chart.forEach(n=>{
+    tone(n.freq, audioStart+n.offset/1000, Math.max(0.25, s.song.beat*n.durBeats*0.9));
+    n.hitTime=s.perfStart+n.offset;     // 받아야 하는 시각(performance time)
+    n.el=null; n.spawned=false; n.judged=false;
+  });
+  s.endTime=s.perfStart+s.total+TRAVEL+600;
+  requestAnimationFrame(loop);
+}
+
+function spawnNote(n){
+  const el=document.createElement("div");
+  el.className="note"; el.textContent=NOTE_EMOJIS[n.lane];
+  el.style.left=laneX[n.lane]+"px";
+  playfield.appendChild(el);
+  n.el=el; n.spawned=true;
+}
+
+function loop(now){
+  const s=state; if(!s||!s.running) return;
+  for(const n of s.chart){
+    if(n.judged) continue;
+    const tToHit=n.hitTime-now;          // 남은 시간
+    if(!n.spawned && tToHit<=TRAVEL) spawnNote(n);
+    if(n.spawned){
+      const prog=1-(tToHit/TRAVEL);      // 0(생성)~1(히트라인)
+      const y=topY+prog*(hitY-topY);
+      n.el.style.transform=`translateY(${y}px)`;
+      // 놓친 경우
+      if(now-n.hitTime>W.GOOD){
+        n.judged=true; registerMiss(n);
+      }
+    }
+  }
+  if(now>=s.endTime){ finish(); return; }
+  requestAnimationFrame(loop);
+}
+
+// ----- 입력 -----
+function tapLane(lane){
+  const s=state; if(!s||!s.running) return;
+  flashTarget(lane); moveBunny(lane);
+  // 해당 레인에서 가장 가까운 미판정 노트
+  let best=null,bestDt=Infinity;
+  const now=performance.now();
+  for(const n of s.chart){
+    if(n.lane!==lane||n.judged||!n.spawned) continue;
+    const dt=Math.abs(now-n.hitTime);
+    if(dt<bestDt){bestDt=dt;best=n;}
+  }
+  if(best && bestDt<=W.GOOD){
+    best.judged=true;
+    let kind = bestDt<=W.PERFECT?"PERFECT":bestDt<=W.GREAT?"GREAT":"GOOD";
+    registerHit(best,kind);
+  }
+}
+function registerHit(n,kind){
+  const s=state;
+  const add= kind==="PERFECT"?300:kind==="GREAT"?200:100;
+  s.score+=add+s.combo*2; s.combo++; s.maxCombo=Math.max(s.maxCombo,s.combo);
+  if(kind==="PERFECT")s.perfect++; else if(kind==="GREAT")s.great++; else s.good++;
+  scoreEl.textContent=s.score;
+  blip(true); hopBunny(); sparkle(n.lane);
+  showJudge(kind);
+  showCombo();
+  if(n.el){n.el.classList.add("gone"); const e=n.el; setTimeout(()=>e.remove(),200);}
+}
+function registerMiss(n){
+  const s=state; s.miss++; s.combo=0;
+  blip(false); sadBunny(); showJudge("MISS");
+  showCombo();
+  if(n.el){const e=n.el; e.style.opacity="0"; setTimeout(()=>e.remove(),150);}
+}
+
+// ----- 연출 -----
+function showJudge(kind){
+  const colors={PERFECT:"#ff5fa0",GREAT:"#ff8ac4",GOOD:"#c98ad0",MISS:"#9aa0c0"};
+  const txt={PERFECT:"퍼펙트! ✨",GREAT:"좋아요!",GOOD:"굿!",MISS:"앗.."};
+  judgeEl.textContent=txt[kind]; judgeEl.style.color=colors[kind];
+  judgeEl.style.animation="none"; void judgeEl.offsetWidth; judgeEl.style.animation="judgep .7s ease";
+}
+function showCombo(){
+  const s=state;
+  if(s.combo>=2){comboEl.innerHTML=`<div class="num pop">${s.combo}</div><div class="txt">COMBO</div>`;}
+  else comboEl.innerHTML="";
+}
+function flashTarget(lane){
+  const t=hitline.querySelector(`.target[data-lane="${lane}"]`);
+  if(t){t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash");}
+}
+function moveBunny(lane){ bunny.style.left=(laneX[lane]-32)+"px"; }
+function hopBunny(){ bunny.classList.remove("sad","hop"); void bunny.offsetWidth; bunny.classList.add("hop"); bunny.textContent="😋"; setTimeout(()=>bunny.textContent="🐰",300); }
+function sadBunny(){ bunny.classList.remove("hop","sad"); void bunny.offsetWidth; bunny.classList.add("sad"); bunny.textContent="😣"; setTimeout(()=>bunny.textContent="🐰",300); }
+function sparkle(lane){
+  const emojis=["✨","💗","⭐","🌟","🌸"];
+  for(let i=0;i<5;i++){
+    const sp=document.createElement("div"); sp.className="spark";
+    sp.textContent=emojis[(Math.random()*emojis.length)|0];
+    sp.style.left=laneX[lane]+"px"; sp.style.top=(hitY-20)+"px";
+    sp.style.setProperty("--dx",(Math.random()*80-40)+"px");
+    sp.style.setProperty("--dy",(-Math.random()*70-20)+"px");
+    $("#game").appendChild(sp); setTimeout(()=>sp.remove(),600);
+  }
+}
+
+// ----- 종료 / 결과 -----
+function finish(){
+  const s=state; s.running=false;
+  // 남은 노트 정리
+  playfield.querySelectorAll(".note").forEach(e=>e.remove());
+  const totalNotes=s.chart.length;
+  const hits=s.perfect+s.great+s.good;
+  const acc= totalNotes? Math.round((s.perfect*1+s.great*0.7+s.good*0.4)/totalNotes*100):0;
+  let rank = acc>=95?"S":acc>=85?"A":acc>=70?"B":acc>=50?"C":"D";
+  const endFace={S:"🥰",A:"😊",B:"🙂",C:"😅",D:"🥲"}[rank];
+  $("#rankLetter").textContent=rank;
+  $("#endBunny").textContent="🐰";
+  // 등급 토끼 표정 추가
+  $("#rScore").textContent=s.score;
+  $("#rCombo").textContent=s.maxCombo;
+  $("#rPerfect").textContent=s.perfect;
+  $("#rAcc").textContent=acc+"%";
+  $("#endBunny").textContent=endFace==="🥰"?"🐰":"🐰";
+  show("result");
+  // 축하 반짝이
+  if(rank==="S"||rank==="A"){ for(let i=0;i<14;i++) setTimeout(()=>resultSpark(),i*70); }
+}
+function resultSpark(){
+  const sp=document.createElement("div"); sp.className="spark";
+  sp.textContent=["✨","💗","⭐","🌸"][(Math.random()*4)|0];
+  sp.style.left=(20+Math.random()*60)+"%"; sp.style.top=(15+Math.random()*30)+"%";
+  sp.style.setProperty("--dx",(Math.random()*120-60)+"px");
+  sp.style.setProperty("--dy",(Math.random()*120-30)+"px");
+  $("#result").appendChild(sp); setTimeout(()=>sp.remove(),600);
+}
+function quitToTitle(){ if(state)state.running=false; playfield.querySelectorAll(".note").forEach(e=>e.remove()); show("title"); }
+
+// ----- 이벤트 바인딩 -----
+// 곡 목록 버튼 생성
+const list=$("#songList");
+Object.entries(SONGS).forEach(([key,song])=>{
+  const b=document.createElement("button"); b.className="song-btn";
+  b.innerHTML=`<span class="emoji">${song.emoji}</span><span>${song.name}</span><span class="meta">🥕 ${song.notes.length}</span>`;
+  b.addEventListener("click",()=>startGame(key));
+  list.appendChild(b);
+});
+
+// 화면 탭 -> 레인 입력 (게임 중)
+$("#game").addEventListener("pointerdown",e=>{
+  if(!state||!state.running) return;
+  const rect=$("#app").getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const margin=rect.width*0.06, usable=rect.width-margin*2;
+  let lane=Math.floor((x-margin)/usable*LANES);
+  lane=Math.max(0,Math.min(LANES-1,lane));
+  tapLane(lane);
+},{passive:true});
+
+// 키보드 입력
+window.addEventListener("keydown",e=>{
+  const i=KEYS.indexOf(e.key.toLowerCase());
+  if(i>=0 && state && state.running){ e.preventDefault(); tapLane(i); }
+});
+
+$("#backBtn").addEventListener("click",quitToTitle);
+$("#retry").addEventListener("click",()=>startGame(state.key));
+$("#toTitle").addEventListener("click",quitToTitle);
+
+show("title");
+</script>
+</body>
+</html>
